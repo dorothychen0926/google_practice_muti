@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GOOGLE地圖測試</title>
+    <style>
+      /* Set the size of the div element that contains the map */
+      #map {
+        height: 400px; /* The height is 400 pixels */
+        width: 100%; /* The width is the width of the web page */
+        border: 1px solid green;
+      }
+      img {
+        width: 50px;
+        height: 50px;
+      }
+    </style>
+  </head>
+  <body>
+    <h3>台北市政府地圖</h3>
+    <!--The div element for the map -->
+    <div id="map"></div>
+    <!-- async非同步, 等它 -->
+    <script
+      async
+      defer
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDlWDn1_cVGdVzvU2ddsTJ81-9BOTflz4k&callback=initMap"
+    ></script>
+    <!-- 使用 CDN 存取時，程式庫可在全域 markerClusterer 下方找到。 -->
+    <script
+      async
+      defer
+      src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"
+    ></script>
+    <!-- <script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script> -->
+    <script>
+      const cityHall = { lat: 25.037517619650572, lng: 121.56384228684448 };
+      const locations = [
+        { lat: 25.032314418143997, lng: 121.56166953414035 },
+        { lat: 25.030160546704188, lng: 121.55425158661555 },
+        { lat: 25.041145055501868, lng: 121.55215946360758 },
+        { lat: 25.03758734888514, lng: 121.56351057215743 },
+        { lat: 25.04410340048848, lng: 121.56067532585377 },
+      ];
+
+      // Initialize and add the map
+      function initMap() {
+        //>>>>>建立新的地圖物件
+        const map = new google.maps.Map(document.getElementById("map"), {
+          zoom: 16,
+          //中心為cityhall
+          center: cityHall,
+        });
+
+        //>>>>>叢集標記
+
+        //新增一個陣列，標示的時候給他一個名稱A-Z，不一定要做
+        // Create an array of alphabetical characters used to label the markers.
+        const labels = [
+          "四四南村",
+          "臨江夜市",
+          "明曜百貨",
+          "市府廣場",
+          "松菸文創",
+        ];
+        const marker_labels = "ABCDE";
+        // 同時建立一個空的 markers 陣列，用這個陣列的內容來宣告一個個新的地圖標記。
+        // Add some markers to the map.
+        //locations.map()是一個函式
+        const markers = locations.map((position, i) => {
+          const label = marker_labels[i];
+          const marker = new google.maps.Marker({
+            //傳進來的position
+            position,
+            //"ABCDE"
+            label,
+            icon: "placeholder-mini.jpg",
+          });
+          //資訊視窗
+          const infowindow = new google.maps.InfoWindow({
+            content: `${labels[i]}`,
+            //無障礙
+            ariaLabel: `${labels[i]}`,
+          });
+          // markers can only be keyboard focusable when they have click listeners
+          // open info window when marker is clicked
+          marker.addListener("click", () => {
+            //地圖顯示
+            infoWindow.setContent(label);
+            // infoWindow.open({ anchor: marker, map });
+          });
+          return marker;
+        });
+
+        const markerCluster = new markerClusterer.MarkerClusterer({
+          map,
+          markers,
+        });
+
+        //若是 本機端就不用HTTP
+        const iconBase =
+          "https://developers.google.com/maps/documentation/javascript/examples/full/images/";
+        const icons = {
+          info: {
+            icon: iconBase + "info-i_maps.png",
+          },
+        };
+        const features = [
+          {
+            position: new google.maps.LatLng(-33.91721, 151.2263),
+            type: "info",
+          },
+        ];
+        // Create markers.
+        for (let i = 0; i < features.length; i++) {
+          const marker = new google.maps.Marker({
+            position: features[i].position,
+            //陣列裡的object所以.type去取得它的icon
+            icon: icons[features[i].type].icon,
+            map: map,
+          });
+        }
+      }
+
+      window.initMap = initMap;
+    </script>
+  </body>
+</html>
